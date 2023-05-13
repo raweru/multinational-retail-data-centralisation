@@ -69,16 +69,8 @@ class DataExtractor:
         table in the database.
         
         '''
-        with database_extractor.engine.connect() as conn:
+        with self.engine.connect() as conn:
             df = pd.read_sql_table(table_name, con=conn)
             
         return df
 
-
-if __name__ == '__main__':
-    database_extractor = DataExtractor()
-    creds_dict = database_extractor.read_db_creds("db_creds.yaml")
-    db_engine = database_extractor.init_db_engine(creds_dict)
-    #table_list = database_extractor.list_db_tables()
-    read_table = database_extractor.read_rds_table("legacy_users")
-    #print(read_table)

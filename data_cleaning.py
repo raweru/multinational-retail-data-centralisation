@@ -18,7 +18,6 @@ class DataCleaning:
                 if letter in "0123456789!#$%&'()*+,/:;?@[\]^_`{|}~":
                     values.append(name)
                     break
-        #user_table[user_table['first_name'].isin(values)]
         indices = user_table[user_table['first_name'].isin(values)].index
         user_table.drop(indices, inplace=True)
         # convert the date column to datetime format, BD
