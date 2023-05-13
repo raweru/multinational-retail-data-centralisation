@@ -124,3 +124,53 @@ class DataCleaning:
         
         return user_table
 
+    def clean_card_data(self, card_table):
+        card_table = card_table.replace("NULL", np.nan)
+        # drop rows with null values
+        card_table = card_table.dropna()
+        # convert the date column to datetime format
+        card_table['date_payment_confirmed'] = pd.to_datetime(card_table['date_payment_confirmed'], errors='coerce')
+        # reformat the date column to YYYY-MM-DD
+        card_table['date_payment_confirmed'] = card_table['date_payment_confirmed'].dt.strftime('%Y-%m-%d')
+        # some rows have random numbers in all rows
+        values = []
+        for name in card_table["expiry_date"]:
+            for letter in name:
+                if letter in "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM!#$%&'()*+,:;?@[\]^_`{|}~":
+                    values.append(name)
+                    break
+        indices = card_table[card_table['expiry_date'].isin(values)].index
+        card_table.drop(indices, inplace=True)
+        # drop "X digits" from card_provider
+        def x_digit_remover(provider):
+            if "digit" in provider:
+                provider = provider.split(" ")[0]
+            
+            return provider
+        # We'll iterate over rows of the dataframe and reassign the row to the standardized version
+        for index, row in card_table.iterrows():
+            row["card_provider"] = x_digit_remover(row["card_provider"])
+        # some VISA card numbers have 19 digits, have 000 at the end that needs removing
+        def zeros_digit_remover(card_number):
+            card_number = str(card_number)
+            if len(card_number) > 16 and card_number[-3:] == "000":
+                card_number = card_number[:-3]
+                card_number = int(card_number)
+            
+            return card_number
+        # We'll iterate over rows of the dataframe and reassign the row to the standardized version
+        for index, row in card_table.iterrows():
+            row["card_number"] = zeros_digit_remover(row["card_number"])
+        # some card numbers start with a few ? marks
+        def q_mark_remover(card_number):
+            card_number = str(card_number)
+            while card_number[0] == "?":
+                card_number = card_number[1:]
+            card_number = int(card_number)
+            
+            return card_number
+        # We'll iterate over rows of the dataframe and reassign the row to the standardized version
+        for index, row in card_table.iterrows():
+            row["card_number"] = q_mark_remover(row["card_number"])
+            
+        return card_table

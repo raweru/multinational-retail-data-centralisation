@@ -2,6 +2,7 @@ import yaml
 from sqlalchemy import create_engine
 from sqlalchemy import inspect
 import pandas as pd
+import tabula
 
 class DataExtractor:
     def __init__(self):
@@ -74,3 +75,9 @@ class DataExtractor:
             
         return df
 
+    def retrieve_pdf_data(self, link):
+        # Read remote pdf into list of DataFrame
+        card_tables = tabula.read_pdf(link, pages='all')
+        card_table = pd.concat(card_tables)
+        
+        return card_table

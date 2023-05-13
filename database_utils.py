@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import inspect
 from data_extraction import DataExtractor
 from data_cleaning import DataCleaning
+import tabula
 
 # The class defines the parameters for connecting to a PostgreSQL database using psycopg2.
 class DatabaseConnector:
@@ -46,26 +47,43 @@ class DatabaseConnector:
         as SQLAlchemy. It is used to connect to a database and execute SQL commands.
         
         '''
-        dataframe.to_sql(table_name, engine, if_exists='replace')
+        dataframe.to_sql(table_name, engine, if_exists='replace', index=False)
 
 
 
 if __name__ == '__main__':
-    database_extractor = DataExtractor()
-    # read credentials from yaml file
-    creds_dict = database_extractor.read_db_creds("db_creds.yaml")
-    # create engine 1
-    db_engine = database_extractor.init_db_engine(creds_dict)
-    # read user table
-    user_table = database_extractor.read_rds_table("legacy_users")
+    def upload_user_data_to_db():
+        database_extractor = DataExtractor()
+        # read credentials from yaml file
+        creds_dict = database_extractor.read_db_creds("db_creds.yaml")
+        # create engine 1
+        db_engine = database_extractor.init_db_engine(creds_dict)
+        # read user table
+        user_table = database_extractor.read_rds_table("legacy_users")
+        
+        data_cleaner = DataCleaning()
+        # clean user table
+        user_table = data_cleaner.clean_user_data(user_table)
+        
+        data_connector = DatabaseConnector()
+        # connect to sales_data database
+        sales_data_engine = data_connector.init_db_engine()
+        # upload user_table to sales_data
+        data_connector.upload_to_db(user_table, "dim_users", sales_data_engine)
     
-    data_cleaner = DataCleaning()
-    # clean user table
-    user_table = data_cleaner.clean_user_data(user_table)
-    
-    data_connector = DatabaseConnector()
-    # connect to sales_data database
-    sales_data_engine = data_connector.init_db_engine()
-    # upload user_table to sales_data
-    data_connector.upload_to_db(user_table, "dim_users", sales_data_engine)
-    
+    def upload_card_data_to_db():
+        database_extractor = DataExtractor()
+        # read card pdf to 
+        card_table = database_extractor.retrieve_pdf_data("https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf")
+        
+        data_cleaner = DataCleaning()
+        # clean card table
+        user_table = data_cleaner.clean_card_data(card_table)
+        
+        data_connector = DatabaseConnector()
+        # connect to sales_data database
+        sales_data_engine = data_connector.init_db_engine()
+        # upload card_table to sales_data
+        data_connector.upload_to_db(user_table, "dim_card_details", sales_data_engine)
+
+    upload_card_data_to_db()
