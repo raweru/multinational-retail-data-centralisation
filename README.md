@@ -15,7 +15,7 @@ You work for a multinational company that sells various goods across the globe. 
 
 ### Task 1: Set up a new database to store the data
 
-We used pgadmin4/postgresql to set up a new database called sales_data, where we centralized all the data.
+We used pgadmin4/postgresql to set up a new database called **sales_data**, where we centralized all the data.
 
 ### Task 2: Initialize three project classes
 
@@ -38,11 +38,12 @@ Legacy user data is hosted on AWS and can be accessed with the details from db_c
 
 Once extracted and cleaned,we used the **upload_to_db** method to store the data in sales_data database in a table named **dim_users**.
 
-### Task 4: Extracting and cleaning user's card details
+### Task 4: Extracting and cleaning users' card details
 
-User's card details are stored in in a pdf document [here](https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf). 
+Users' card details are stored in in a pdf document [here](https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf). 
 
 1. **retrieve_pdf_data** in DatabaseExtractor takes in a link as an argument and returns a pandas DataFrame.
 2. **clean_card_data** in DataCleaning performs the cleaning of the credit card data. Contains multiple functions needed, check their docstrings for more information.
 
 Once cleaned, we uploaded the table with **upload_to_db** method to sales_data in a table called **dim_card_details**.
+
