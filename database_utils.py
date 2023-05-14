@@ -1,11 +1,6 @@
-import pandas as pd
-import numpy as np
-import yaml
 from sqlalchemy import create_engine
-from sqlalchemy import inspect
 from data_extraction import DataExtractor
 from data_cleaning import DataCleaning
-import tabula
 
 
 # The `DatabaseConnector` class provides methods to initialize a PostgreSQL database engine and upload
@@ -103,6 +98,6 @@ if __name__ == "__main__":
         data_connector.upload_to_db(user_table, "dim_card_details", sales_data_engine)
 
     # TODO: uncomment this line to upload user data to sales_data database
-    # upload_user_data_to_db()
+    upload_user_data_to_db()
     # TODO: uncomment this line to upload card data to sales_data database
     # upload_card_data_to_db()
