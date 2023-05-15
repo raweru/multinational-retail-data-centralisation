@@ -363,7 +363,7 @@ class DataCleaning:
         # Drop lat column as only has 7 non null values
         store_data = store_data.drop("lat", axis=1)
 
-        # Drop missing values only from rows that have NULL in all columns
+        # Drop rows that have NULL in all columns
         store_data.drop(labels=[217, 405, 437], axis=0, inplace=True)
 
         # some rows have random numbers in all rows
@@ -427,3 +427,121 @@ class DataCleaning:
         store_corrupt_row_remover()
 
         return store_data
+
+    def convert_product_weights(self, product_data):
+        """
+        This function converts product weights in various units to decimal values in kg and renames the
+        weight column as weight_kg while replacing 0.0 values with np.nan.
+
+        Args:
+            product_data: a pandas DataFrame containing information about products, including their
+        weights in various units.
+
+        Returns:
+            the modified product_data dataframe with weights converted to decimal values in kg, the weight
+        column renamed to weight_kg, and any 0.0 values in the weight column replaced with np.nan.
+        """
+        # one value is "77g .", removing " ."
+        product_data["weight"] = product_data["weight"].str.replace(
+            " .", "", regex=True
+        )
+
+        # Convert weights to decimal values in kg
+        def product_weight_kg_converter():
+            for index, row in product_data.iterrows():
+                weight = row["weight"]
+                # some values are 3 x 20g, splitting them on "x", removing "g" and multiplying
+                if "x" in weight:
+                    if weight.endswith("g"):
+                        weight = weight[:-1]
+                        substrings = weight.split("x")
+                        weight = round(
+                            (float(substrings[0]) * float(substrings[1]) / 1000), 2
+                        )
+                    elif weight.endswith("ml"):
+                        weight = weight[:-2]
+                        substrings = weight.split("x")
+                        weight = round(
+                            (float(substrings[0]) * float(substrings[1]) / 1000), 2
+                        )
+                elif weight.endswith("kg"):
+                    weight = round((float(weight[:-2])), 2)
+                elif weight.endswith("g"):
+                    weight = round((float(weight[:-1]) / 1000), 2)
+                elif weight.endswith("ml"):
+                    weight = round((float(weight[:-2]) / 1000), 2)
+                elif weight.endswith("oz"):
+                    weight = round((float(weight[:-2]) * 28.413 / 1000), 2)
+                product_data.at[index, "weight"] = weight
+
+        product_weight_kg_converter()
+
+        # rename column as weight_kg
+        product_data.rename(columns={"weight": "weight_kg"}, inplace=True)
+
+        # some products have value 0.0, changed to np.nan
+        product_data["weight_kg"] = product_data["weight_kg"].replace(0.0, np.nan)
+
+        return product_data
+
+    def clean_products_data(self, product_data):
+        """
+        The function cleans and formats product data by dropping null rows, removing corrupt rows,
+        renaming columns, formatting prices, and converting date columns to datetime format.
+
+        Args:
+            product_data: A pandas dataframe containing product data.
+
+        Returns:
+            the cleaned product data after performing various data cleaning operations such as dropping
+        rows with NULL values, removing rows with non-numeric characters in the expiry date, renaming
+        columns, formatting the date column to datetime format, and removing the £ sign from the product
+        price column.
+        """
+        # Drop rows that have NULL in all columns
+        product_data.drop(labels=[266, 788, 794, 1660], axis=0, inplace=True)
+
+        # some rows have random numbers in all rows
+        def product_corrupt_row_remover():
+            """
+            This function removes rows from a card table where the expiry date contains non-numeric
+            characters except forward slash.
+            """
+            values = []
+            for name in product_data["category"]:
+                if pd.notnull(name):  # Check if the value is not NaN
+                    for letter in name:
+                        if letter in "1234567890":
+                            values.append(name)
+                            break
+            indices = product_data[product_data["category"].isin(values)].index
+            product_data.drop(indices, inplace=True)
+
+        # rename Unnamed: 0 column to index
+        product_data.rename(columns={"Unnamed: 0": "index"}, inplace=True)
+
+        # remove £ sign from prices and add to column name
+        def product_price_formatter():
+            product_data.rename(
+                columns={"product_price": "product_price_£"}, inplace=True
+            )
+            product_data["product_price_£"] = product_data[
+                "product_price_£"].str.replace("£", "")
+
+        def product_datetime_formatter():
+            """
+            This function converts a date column in a pandas dataframe to datetime format and reformats
+            it to YYYY-MM-DD.
+            """
+            product_data["date_added"] = pd.to_datetime(
+                product_data["date_added"], errors="coerce")
+            # reformat the date column to YYYY-MM-DD
+            product_data["date_added"] = product_data["date_added"].dt.strftime(
+                "%Y-%m-%d")
+
+        product_datetime_formatter()
+        product_corrupt_row_remover()
+        product_price_formatter()
+
+        return product_data
+

@@ -44,7 +44,7 @@ Once extracted and cleaned,we use the **upload_to_db** method to store the data 
 
 ### Task 4: Extract and clean users' card details
 
-Users' card details are stored in in a pdf document [here](https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf). We create a few methods to extract, clean and upload the user data.
+Users' card details are stored in in a pdf document [here](https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf). We create a few methods to extract, clean and upload the card data.
 
 1. **retrieve_pdf_data** in DatabaseExtractor takes in a link as an argument and returns a pandas DataFrame.
 2. **clean_card_data** in DataCleaning performs the cleaning of the credit card data. Contains multiple functions needed, check their docstrings for more information.
@@ -60,7 +60,7 @@ To connect to the API we need to include the API key to connect to the API in th
 - Retrieve a store: https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{store_number}
 - Return the number of stores: https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores
 
-We create the header dict and a few methods to extract, clean and upload the user data.
+We create the header dict and a few methods to extract, clean and upload the store data.
 
 1. Create a dictionary to store the header details. It will have a key **x-api-key** with the value **yFBQbwXe9J3sd6zWVAMrK6lcxxr0q1lr2PT6DDMX**.
 2. **list_number_of_stores** in DataExtractor returns the number of stores to extract. It should take in the "Number of stores" endpoint and header dictionary as an argument.
@@ -68,3 +68,15 @@ We create the header dict and a few methods to extract, clean and upload the use
 4. **clean_store_data** in DataCleaning cleans the data retrieved from the API and returns a pandas DataFrame.
 
 Once extracted and cleaned, we upload the table with **upload_to_db** method to sales_data in a table called **dim_store_details**.
+
+### Task 6: Extract and clean the product details
+
+The information for each product the company currently sells is stored in CSV format in an S3 bucket on AWS. The S3 address for the products data is the following: **s3://data-handling-public/products.csv**.
+
+We create a few methods to extract, clean and upload the user data.
+
+1. **extract_from_s3** in DataExtractor uses the boto3 package to download and extract the information returning a pandas DataFrame. We need to be logged into the AWS CLI before retrieving the data from the bucket.
+2. **convert_product_weights** in DataCleaning takes the products DataFrame as an argument and converts all different weight units and formats into kg decimal value.
+3. **clean_products_data** in DataCleaning cleans the rest of the data and returns a pandas DataFrame.
+
+Once extracted and cleaned, we upload the table with **upload_to_db** method to sales_data in a table called **dim_products**.

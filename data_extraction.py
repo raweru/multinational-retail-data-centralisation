@@ -4,6 +4,7 @@ from sqlalchemy import inspect
 import pandas as pd
 import tabula
 import requests
+import boto3
 
 
 # The `DataExtractor` class provides methods for reading database credentials from a YAML file,
@@ -140,3 +141,29 @@ class DataExtractor:
                     f"Failed to retrieve data for store {store_number}: {response.status_code} - {response.content}"
                 )
         return pd.DataFrame(stores_data)
+
+    def extract_from_s3(self, s3_address):
+        """
+        This method downloads and extracts the information stored in a CSV file from an S3 bucket and returns a
+        pandas DataFrame.
+
+        Args:
+            s3_address: The S3 address of the CSV file in the format "s3://bucket-name/file-path.csv".
+
+        Returns:
+            A pandas DataFrame containing the extracted data.
+        """
+        # Split the S3 address into bucket name and file path
+        bucket_name, file_path = s3_address.replace("s3://", "").split("/", 1)
+
+        # Download the file from S3
+        s3 = boto3.client("s3")
+        s3.download_file(bucket_name, file_path, "products.csv")
+
+        # Read the CSV file into a DataFrame
+        df = pd.read_csv("products.csv")
+
+        # Return the DataFrame
+        return df
+    
+    

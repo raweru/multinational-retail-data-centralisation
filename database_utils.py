@@ -3,8 +3,8 @@ from data_extraction import DataExtractor
 from data_cleaning import DataCleaning
 
 
-# The `DatabaseConnector` class provides methods to initialize a PostgreSQL database engine and upload
-# a pandas dataframe to a SQL database table.
+# The `DatabaseConnector` class contains methods for initializing a database engine and uploading data
+# from a pandas dataframe to a SQL database table.
 class DatabaseConnector:
     def __init__(self):
         """
@@ -104,17 +104,34 @@ if __name__ == "__main__":
         database_extractor = DataExtractor()
         # extract store data from API into dataframe
         store_data = database_extractor.retrieve_stores_data(
-            "https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{}")
-        
+            "https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{}"
+        )
+
         data_cleaner = DataCleaning()
         # clean store table
         store_data = data_cleaner.clean_store_data(store_data)
-        
+
         data_connector = DatabaseConnector()
         # connect to sales_data database
         sales_data_engine = data_connector.init_db_engine()
         # upload card_table to sales_data
         data_connector.upload_to_db(store_data, "dim_store_details", sales_data_engine)
+
+    def upload_product_data_to_db():
+        extractor = DataExtractor()
+        # extract product data from AWS S3 bucket
+        product_data = extractor.extract_from_s3("s3://data-handling-public/products.csv")
+        
+        data_cleaner = DataCleaning()
+        # convert weights to kg
+        product_data = data_cleaner.clean_products_data(product_data)
+        product_data = data_cleaner.convert_product_weights(product_data)
+        
+        data_connector = DatabaseConnector()
+        # connect to sales_data database
+        sales_data_engine = data_connector.init_db_engine()
+        # upload products table to sales_data
+        data_connector.upload_to_db(product_data, "dim_products", sales_data_engine)
         
     # TODO: uncomment line below to upload user data to sales_data database
     # upload_user_data_to_db()
@@ -122,4 +139,5 @@ if __name__ == "__main__":
     # upload_card_data_to_db()
     # TODO: uncomment line below to upload store data to sales_data database
     # upload_store_data_to_db()
-
+    # TODO: uncomment line below to upload products data to sales_data database
+    # upload_product_data_to_db()
