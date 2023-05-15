@@ -57,8 +57,8 @@ The store data can be retrieved through the use of an API. The API has two GET m
 
 To connect to the API we need to include the API key to connect to the API in the method header. The two endpoints for the API are as follows:
 
-Retrieve a store: https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{store_number}
-Return the number of stores: https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores
+- Retrieve a store: https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{store_number}
+- Return the number of stores: https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores
 
 We create the header dict and a few methods to extract, clean and upload the user data.
 
