@@ -89,15 +89,37 @@ if __name__ == "__main__":
 
         data_cleaner = DataCleaning()
         # clean card table
-        user_table = data_cleaner.clean_card_data(card_table)
+        card_table = data_cleaner.clean_card_data(card_table)
 
         data_connector = DatabaseConnector()
         # connect to sales_data database
         sales_data_engine = data_connector.init_db_engine()
         # upload card_table to sales_data
-        data_connector.upload_to_db(user_table, "dim_card_details", sales_data_engine)
+        data_connector.upload_to_db(card_table, "dim_card_details", sales_data_engine)
 
-    # TODO: uncomment this line to upload user data to sales_data database
-    upload_user_data_to_db()
-    # TODO: uncomment this line to upload card data to sales_data database
+    def upload_store_data_to_db():
+        """
+        This function extracts store data from an API, cleans it, and uploads it to a database.
+        """
+        database_extractor = DataExtractor()
+        # extract store data from API into dataframe
+        store_data = database_extractor.retrieve_stores_data(
+            "https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{}")
+        
+        data_cleaner = DataCleaning()
+        # clean store table
+        store_data = data_cleaner.clean_store_data(store_data)
+        
+        data_connector = DatabaseConnector()
+        # connect to sales_data database
+        sales_data_engine = data_connector.init_db_engine()
+        # upload card_table to sales_data
+        data_connector.upload_to_db(store_data, "dim_store_details", sales_data_engine)
+        
+    # TODO: uncomment line below to upload user data to sales_data database
+    # upload_user_data_to_db()
+    # TODO: uncomment line below to upload card data to sales_data database
     # upload_card_data_to_db()
+    # TODO: uncomment line below to upload store data to sales_data database
+    # upload_store_data_to_db()
+

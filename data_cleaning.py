@@ -334,3 +334,96 @@ class DataCleaning:
             row["card_number"] = card_q_mark_remover(row["card_number"])
 
         return card_table
+
+    def clean_store_data(self, store_data):
+        """
+        This function cleans and formats data in a pandas DataFrame for a store dataset.
+
+        Args:
+            store_data: a pandas DataFrame containing information about stores, such as their addresses,
+        staff numbers, opening dates, and continents. The function aims to clean and format the data in
+        this DataFrame by removing missing values, formatting staff numbers and addresses, and
+        converting the opening date column to datetime format.
+
+        Returns:
+            the cleaned store_data dataframe after applying various data cleaning operations such as
+        replacing null values, dropping columns and rows with missing values, removing non-numeric
+        characters from staff numbers, removing "ee" from continent values, and reformatting date
+        columns to YYYY-MM-DD format.
+        """
+        # replace 'NULL' string with null
+        store_data = store_data.replace("NULL", np.nan)
+
+        # replace 'N/A' string with null
+        store_data = store_data.replace("N/A", np.nan)
+
+        # replace 'None' string with null
+        store_data = store_data.replace("None", np.nan)
+
+        # Drop lat column as only has 7 non null values
+        store_data = store_data.drop("lat", axis=1)
+
+        # Drop missing values only from rows that have NULL in all columns
+        store_data.drop(labels=[217, 405, 437], axis=0, inplace=True)
+
+        # some rows have random numbers in all rows
+        def store_corrupt_row_remover():
+            """
+            This function removes rows from a card table where the expiry date contains non-numeric
+            characters except forward slash.
+            """
+            values = []
+            for name in store_data["locality"]:
+                if pd.notnull(name):  # Check if the value is not NaN
+                    for letter in name:
+                        if letter in "1234567890!#$%&'()*+,:;?@[\]^_`{|}~":
+                            values.append(name)
+                            break
+            indices = store_data[store_data["locality"].isin(values)].index
+            store_data.drop(indices, inplace=True)
+
+        def store_address_formatter():
+            """
+            This function replaces newline characters in the "address" column of a pandas DataFrame with
+            commas and spaces.
+            """
+            store_data["address"] = store_data["address"].str.replace("\n", ", ")
+
+        # some staff numbers include letters
+        def store_staff_number_formatter():
+            """
+            The function removes any alphabetical characters from the 'staff_numbers' column in the
+            'store_data' dataframe.
+            """
+            store_data["staff_numbers"] = store_data["staff_numbers"].str.replace(
+                "[a-zA-Z]", ""
+            )
+
+        # some continent values eeAmerica/eeEurope need ee removed
+        def store_ee_continent_remover():
+            """
+            This function removes the string "ee" from the beginning of each value in a specific column
+            of a pandas DataFrame called "store_data".
+            """
+            store_data["continent"] = store_data["continent"].str.replace("^ee", "")
+
+        def store_datetime_formatter():
+            """
+            This function converts a date column in a pandas dataframe to datetime format and reformats
+            it to YYYY-MM-DD.
+            """
+            store_data["opening_date"] = pd.to_datetime(
+                store_data["opening_date"], errors="coerce"
+            )
+            # reformat the date column to YYYY-MM-DD
+            store_data["opening_date"] = store_data["opening_date"].dt.strftime(
+                "%Y-%m-%d"
+            )
+
+        store_datetime_formatter()
+        store_ee_continent_remover()
+        store_staff_number_formatter()
+        store_address_formatter()
+        store_corrupt_row_remover()
+
+        return store_data
