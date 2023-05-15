@@ -27,7 +27,7 @@ We define three classes that we use for the project:
 2. **DatabaseConnector** in **database_utils.py** connects with and uploads data to sales_data database.
 3. **DataCleaning** in **data_cleaning.py** cleans the data before uploading.
 
-We imported all classes into database_utils.py, which was used to upload the data streams into the new database one by one. I used the cleaner.ipynb notebook file to do the cleaning, before writing the final cleaning methods.
+We imported all classes into database_utils.py, which was used to upload the data streams into the new database one by one. cleaner.ipynb notebook file was used to do the cleaning before writing the final cleaning methods.
 
 ### Task 3: Extract and clean the user data
 
