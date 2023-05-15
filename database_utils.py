@@ -123,8 +123,9 @@ if __name__ == "__main__":
         product_data = extractor.extract_from_s3("s3://data-handling-public/products.csv")
         
         data_cleaner = DataCleaning()
-        # convert weights to kg
+        # clean product data
         product_data = data_cleaner.clean_products_data(product_data)
+        # convert weights to kg
         product_data = data_cleaner.convert_product_weights(product_data)
         
         data_connector = DatabaseConnector()
@@ -154,7 +155,21 @@ if __name__ == "__main__":
         sales_data_engine = data_connector.init_db_engine()
         # upload orders table to sales_data
         data_connector.upload_to_db(order_data, "orders_table", sales_data_engine)
+    
+    def upload_date_events_to_db():
+        database_extractor = DataExtractor()
+        url = 'https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json'
+        date_events = database_extractor.download_json_s3(url)
         
+        data_cleaner = DataCleaning()
+        date_events = data_cleaner.clean_date_events_data(date_events)
+        
+        data_connector = DatabaseConnector()
+        # connect to sales_data database
+        sales_data_engine = data_connector.init_db_engine()
+        # upload products table to sales_data
+        data_connector.upload_to_db(date_events, "dim_date_times", sales_data_engine)
+            
     # TODO: uncomment line below to upload user data to sales_data database
     # upload_user_data_to_db()
     # TODO: uncomment line below to upload card data to sales_data database
@@ -165,3 +180,5 @@ if __name__ == "__main__":
     # upload_product_data_to_db()
     # TODO: uncomment line below to upload orders data to sales_data database
     # upload_order_data_to_db()
+    # TODO: uncomment line below to upload orders data to sales_data database
+    # upload_date_events_to_db()

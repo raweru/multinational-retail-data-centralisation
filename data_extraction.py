@@ -5,6 +5,7 @@ import pandas as pd
 import tabula
 import requests
 import boto3
+import json
 
 
 # The `DataExtractor` class provides methods for reading database credentials from a YAML file,
@@ -166,4 +167,23 @@ class DataExtractor:
         # Return the DataFrame
         return df
     
+    def download_json_s3(self, s3_link):
+        """
+        This function downloads a JSON file from an S3 link, converts it to a pandas DataFrame, and
+        returns the DataFrame.
+        
+        Args:
+            s3_link: The parameter `s3_link` is a string that represents the link to a JSON file stored in
+        an Amazon S3 bucket. The function downloads the JSON file from the S3 bucket using the link,
+        converts it to a pandas DataFrame, and returns the DataFrame.
+        
+        Returns:
+            a pandas DataFrame that contains the data from a JSON file downloaded from an S3 link.
+        """
+        url = s3_link
+        response = requests.get(url)
+        data = response.json()
+        df = pd.DataFrame(data)
+        
+        return df
     

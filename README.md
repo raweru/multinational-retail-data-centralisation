@@ -73,7 +73,7 @@ Once extracted and cleaned, we upload the table with **upload_to_db** method to 
 
 The information for each product the company currently sells is stored in CSV format in an S3 bucket on AWS. The S3 address for the products data is the following: **s3://data-handling-public/products.csv**.
 
-We create a few methods to extract, clean and upload the user data.
+We create a few methods to extract, clean and upload the products data.
 
 1. **extract_from_s3** in DataExtractor uses the boto3 package to download and extract the information returning a pandas DataFrame. We need to be logged into the AWS CLI before retrieving the data from the bucket.
 2. **convert_product_weights** in DataCleaning takes the products DataFrame as an argument and converts all different weight units and formats into kg decimal value.
@@ -90,3 +90,16 @@ First, we can reuse **list_db_tables** and **read_rds_table** methods to extract
 Next, we create **clean_orders_data** to remove columns "order_0", "first_name", "last_name" and "1".
 
 Once extracted and cleaned, we upload the table with **upload_to_db** method to sales_data in a table called **orders_table**.
+
+### Task 8: Retrieve and clean the date events data
+
+The final source of data is a JSON file containing the details of when each sale happened, as well as related attributes.
+
+The file is currently stored on S3 and can be found at the following [link](https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json).
+
+We create a few methods to extract, clean and upload the date events data.
+
+1. **download_json_s3** in DataExtractor downloads the json file from S3 into a pandas Dataframe.
+2. **clean_date_events_data** in DataCleaning to remove rows with null and corrupt data.
+
+Once extracted and cleaned, we upload the table with **upload_to_db** method to sales_data in a table called **dim_date_times**.

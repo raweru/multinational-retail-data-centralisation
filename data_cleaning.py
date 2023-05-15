@@ -534,7 +534,8 @@ class DataCleaning:
                 columns={"product_price": "product_price_£"}, inplace=True
             )
             product_data["product_price_£"] = product_data[
-                "product_price_£"].str.replace("£", "")
+                "product_price_£"
+            ].str.replace("£", "")
 
         def product_datetime_formatter():
             """
@@ -542,10 +543,12 @@ class DataCleaning:
             it to YYYY-MM-DD.
             """
             product_data["date_added"] = pd.to_datetime(
-                product_data["date_added"], errors="coerce")
+                product_data["date_added"], errors="coerce"
+            )
             # reformat the date column to YYYY-MM-DD
             product_data["date_added"] = product_data["date_added"].dt.strftime(
-                "%Y-%m-%d")
+                "%Y-%m-%d"
+            )
 
         product_datetime_formatter()
         product_corrupt_row_remover()
@@ -555,6 +558,46 @@ class DataCleaning:
 
     def clean_orders_data(self, order_data):
         # remove  columns level_0, first_name, last_name and 1
-        order_data.drop(labels=["level_0", "first_name", "last_name", "1"], axis=1, inplace=True)
-        
+        order_data.drop(
+            labels=["level_0", "first_name", "last_name", "1"], axis=1, inplace=True
+        )
+
         return order_data
+
+    def clean_date_events_data(self, date_events):
+        """
+        This function removes rows from a dataframe where the "month" column contains any
+        non-alphanumeric characters.
+
+        Args:
+            date_events: a pandas dataframe containing date and event information.
+
+        Returns:
+            The function `clean_date_events_data` is returning the cleaned `date_events` dataframe after
+        removing corrupted rows where the "month" column contains any non-alphanumeric characters.
+        """
+
+        # remove corrupted rows and rows with all null values
+        def events_corrupt_row_remover():
+            """
+            This function removes rows from a dataframe where the "month" column contains any
+            non-alphanumeric characters.
+            """
+            
+            values = []
+            for name in date_events["month"]:
+                for letter in name:
+                    if (
+                        letter
+                        in "qwertyuiopasdfghjklmnbvcxzQWERTYUIOPLKJHGFDSAZXCVBNM!#$%&'()*+,/:;?@[\]^_`{|}~"
+                    ):
+                        values.append(name)
+                        break
+            indices = date_events[date_events["month"].isin(values)].index
+            date_events.drop(indices, inplace=True)
+
+        events_corrupt_row_remover()
+
+        return date_events
+
+    
