@@ -80,3 +80,13 @@ We create a few methods to extract, clean and upload the user data.
 3. **clean_products_data** in DataCleaning cleans the rest of the data and returns a pandas DataFrame.
 
 Once extracted and cleaned, we upload the table with **upload_to_db** method to sales_data in a table called **dim_products**.
+
+### Task 7: Retrieve and clean the orders table
+
+This table which acts as the single source of truth for all orders the company has made in the past is stored in a database on AWS RDS.
+
+First, we can reuse **list_db_tables** and **read_rds_table** methods to extract the orders table.
+
+Next, we create **clean_orders_data** to remove columns "order_0", "first_name", "last_name" and "1".
+
+Once extracted and cleaned, we upload the table with **upload_to_db** method to sales_data in a table called **orders_table**.

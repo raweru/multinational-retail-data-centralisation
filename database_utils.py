@@ -132,6 +132,28 @@ if __name__ == "__main__":
         sales_data_engine = data_connector.init_db_engine()
         # upload products table to sales_data
         data_connector.upload_to_db(product_data, "dim_products", sales_data_engine)
+
+    def upload_order_data_to_db():
+        """
+        This function uploads cleaned user data from a legacy database to sales_data database.
+        """
+        database_extractor = DataExtractor()
+        # read credentials from yaml file
+        creds_dict = database_extractor.read_db_creds("db_creds.yaml")
+        # create engine 1
+        db_engine = database_extractor.init_db_engine(creds_dict)
+        # read user table
+        order_data = database_extractor.read_rds_table("orders_table")
+
+        data_cleaner = DataCleaning()
+        # clean orders table
+        order_data = data_cleaner.clean_orders_data(order_data)
+
+        data_connector = DatabaseConnector()
+        # connect to sales_data database
+        sales_data_engine = data_connector.init_db_engine()
+        # upload orders table to sales_data
+        data_connector.upload_to_db(order_data, "orders_table", sales_data_engine)
         
     # TODO: uncomment line below to upload user data to sales_data database
     # upload_user_data_to_db()
@@ -141,3 +163,5 @@ if __name__ == "__main__":
     # upload_store_data_to_db()
     # TODO: uncomment line below to upload products data to sales_data database
     # upload_product_data_to_db()
+    # TODO: uncomment line below to upload orders data to sales_data database
+    # upload_order_data_to_db()

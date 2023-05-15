@@ -448,6 +448,10 @@ class DataCleaning:
 
         # Convert weights to decimal values in kg
         def product_weight_kg_converter():
+            """
+            This function converts product weights in various units to kilograms and updates the
+            product_data dataframe.
+            """
             for index, row in product_data.iterrows():
                 weight = row["weight"]
                 # some values are 3 x 20g, splitting them on "x", removing "g" and multiplying
@@ -522,6 +526,10 @@ class DataCleaning:
 
         # remove £ sign from prices and add to column name
         def product_price_formatter():
+            """
+            This function renames a column in a dataframe and removes the pound sign from the values in
+            that column.
+            """
             product_data.rename(
                 columns={"product_price": "product_price_£"}, inplace=True
             )
@@ -545,3 +553,8 @@ class DataCleaning:
 
         return product_data
 
+    def clean_orders_data(self, order_data):
+        # remove  columns level_0, first_name, last_name and 1
+        order_data.drop(labels=["level_0", "first_name", "last_name", "1"], axis=1, inplace=True)
+        
+        return order_data
