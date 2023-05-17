@@ -10,6 +10,8 @@ You work for a multinational company that sells various goods across the globe. 
 - SQLAlchemy==2.0.9
 - tabula_py==2.7.0
 - yaml==0.2.5
+- Requests==2.30.0
+- boto3==1.26.133
 
 ## Milestone 1: Extract and clean the data from various data sources
 
@@ -103,3 +105,23 @@ We create a few methods to extract, clean and upload the date events data.
 2. **clean_date_events_data** in DataCleaning to remove rows with null and corrupt data.
 
 Once extracted and cleaned, we upload the table with **upload_to_db** method to sales_data in a table called **dim_date_times**.
+
+## Milestone 3: Create the database schema
+
+Now it's all about casting all columns to proper data types and connecting the tables with primary and foreign keys.
+
+**Primary key setup template:**
+
+```sql
+ALTER TABLE dim_store_details
+ADD CONSTRAINT pk_dim_store_details PRIMARY KEY (store_code);
+```
+
+**Foreign key setup template:**
+
+```sql
+ALTER TABLE orders_table
+ADD CONSTRAINT fk_orders_store_code
+FOREIGN KEY (store_code)
+REFERENCES dim_store_details (store_code);
+```

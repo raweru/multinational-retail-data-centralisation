@@ -243,22 +243,7 @@ class DataCleaning:
             ].dt.strftime("%Y-%m-%d")
 
         # some rows have random numbers in all rows
-        def card_corrupt_row_remover():
-            """
-            This function removes rows from a card table where the expiry date contains non-numeric
-            characters except forward slash.
-            """
-            values = []
-            for name in card_table["expiry_date"]:
-                for letter in name:
-                    if (
-                        letter
-                        in "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM!#$%&'()*+,:;?@[\]^_`{|}~"
-                    ):
-                        values.append(name)
-                        break
-            indices = card_table[card_table["expiry_date"].isin(values)].index
-            card_table.drop(indices, inplace=True)
+        card_table = card_table[~card_table['card_number'].astype(str).str.contains('[a-zA-Z]')]
 
         # drop "X digits" from card_provider
         def card_x_digit_remover(provider):
@@ -323,16 +308,16 @@ class DataCleaning:
             return card_number
 
         card_datetime_formatter()
-        card_corrupt_row_remover()
-
+        
         for index, row in card_table.iterrows():
             # iterate over rows of the dataframe and remove "X digits" from card_provider
-            row["card_provider"] = card_x_digit_remover(row["card_provider"])
+            #row["card_provider"] = card_x_digit_remover(row["card_provider"])
             # iterate over rows of the dataframe and remove extra zeros
-            row["card_number"] = card_zeros_digit_remover(row["card_number"])
+            #row["card_number"] = card_zeros_digit_remover(row["card_number"])
             # iterate over rows of the dataframe and remove ? from card_number
             row["card_number"] = card_q_mark_remover(row["card_number"])
-
+        
+        
         return card_table
 
     def clean_store_data(self, store_data):
@@ -504,7 +489,10 @@ class DataCleaning:
         """
         # Drop rows that have NULL in all columns
         product_data.drop(labels=[266, 788, 794, 1660], axis=0, inplace=True)
-
+        
+        # change "removed" values to boolean
+        product_data["removed"] = product_data["removed"].replace({"Still_avaliable": False, "Removed": True})
+        
         # some rows have random numbers in all rows
         def product_corrupt_row_remover():
             """
@@ -600,4 +588,3 @@ class DataCleaning:
 
         return date_events
 
-    
