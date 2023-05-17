@@ -125,3 +125,18 @@ ADD CONSTRAINT fk_orders_store_code
 FOREIGN KEY (store_code)
 REFERENCES dim_store_details (store_code);
 ```
+
+## Milestone 4: Querying the data
+
+With the database setup, we are ready to answer some business questions.
+
+### How many stores does the business have and in which countries?
+
+<img src="stores_per_country.png" alt="isolated" width="400"/>
+
+### Which locations currently have the most stores?
+
+<img src="stores_per_locality.png" alt="isolated" width="400"/>
+
+### Which months produce the average highest cost of sales typically?
+

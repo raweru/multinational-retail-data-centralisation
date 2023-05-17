@@ -350,6 +350,9 @@ class DataCleaning:
 
         # Drop rows that have NULL in all columns
         store_data.drop(labels=[217, 405, 437], axis=0, inplace=True)
+        
+        # Delete country code, continent for WEB PORTAL
+        store_data.loc[store_data['store_type'] == 'Web Portal', ['country_code', 'continent']] = np.nan
 
         # some rows have random numbers in all rows
         def store_corrupt_row_remover():
