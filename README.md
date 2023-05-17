@@ -140,3 +140,13 @@ With the database setup, we are ready to answer some business questions.
 
 ### Which months produce the average highest cost of sales typically?
 
+<img src="sales_per_month.png" alt="isolated" width="400"/>
+
+### How many sales are coming from online?
+
+<img src="web_offline.png" alt="isolated" width="400"/>
+
+### What percentage of sales come through each type of store?
+
+<img src="store_type.png" alt="isolated" width="400"/>
+
