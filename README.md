@@ -148,5 +148,20 @@ With the database setup, we are ready to answer some business questions.
 
 ### What percentage of sales come through each type of store?
 
-<img src="store_type.png" alt="isolated" width="650"/>
+<img src="store_type.png" alt="isolated" width="800"/>
 
+### Which month in each year produced the most sales?
+
+<img src="sales_month_year.png" alt="isolated" width="650"/>
+
+### What is our staff headcount?
+
+<img src="staff_per_country.png" alt="isolated" width="400"/>
+
+### Which German store type is selling the most?
+
+<img src="store_de.png" alt="isolated" width="400"/>
+
+### How quickly is the company making sales?
+
+<img src="times_sales.png" alt="isolated" width="650"/>
