@@ -40,12 +40,12 @@ class DataCleaning:
             """
             values = []
             for name in user_table["first_name"]:
-                for letter in name:
-                    if letter in "0123456789!#$%&'()*+,/:;?@[\]^_`{|}~":
-                        values.append(name)
-                        break
+                if any(letter.isdigit() for letter in name):
+                    values.append(name)
+
             indices = user_table[user_table["first_name"].isin(values)].index
             user_table.drop(indices, inplace=True)
+
 
         def user_datetime_formatter():
             """
@@ -245,47 +245,6 @@ class DataCleaning:
         # some rows have random numbers in all rows
         card_table = card_table[~card_table['card_number'].astype(str).str.contains('[a-zA-Z]')]
 
-        # drop "X digits" from card_provider
-        def card_x_digit_remover(provider):
-            """
-            This function removes the "digit" word from a string if it is present.
-
-            Args:
-                provider: The input parameter "provider" is a string that represents the name of a credit
-            card provider.
-
-            Returns:
-                the modified string `provider` with the word "digit" removed if it is present in the
-            string.
-            """
-            if "digit" in provider:
-                provider = provider.split(" ")[0]
-
-            return provider
-
-        # some VISA card numbers have 19 digits, have 000 at the end that needs removing
-        def card_zeros_digit_remover(card_number):
-            """
-            The function removes the last three zeros from a given card number if it is longer than 16
-            digits.
-
-            Args:
-                card_number: The parameter `card_number` is a numeric value representing a credit card
-            number.
-
-            Returns:
-                the modified card number with the trailing zeros removed. If the original card number had
-            a length greater than 16 and ended with "000", the function removes the last three digits
-            and returns the updated card number as an integer. If the original card number did not meet
-            these conditions, the function returns the original card number as is.
-            """
-            card_number = str(card_number)
-            if len(card_number) > 16 and card_number[-3:] == "000":
-                card_number = card_number[:-3]
-                card_number = int(card_number)
-
-            return card_number
-
         # some card numbers start with a few ? marks
         def card_q_mark_remover(card_number):
             """
@@ -310,10 +269,6 @@ class DataCleaning:
         card_datetime_formatter()
         
         for index, row in card_table.iterrows():
-            # iterate over rows of the dataframe and remove "X digits" from card_provider
-            #row["card_provider"] = card_x_digit_remover(row["card_provider"])
-            # iterate over rows of the dataframe and remove extra zeros
-            #row["card_number"] = card_zeros_digit_remover(row["card_number"])
             # iterate over rows of the dataframe and remove ? from card_number
             row["card_number"] = card_q_mark_remover(row["card_number"])
         
@@ -360,15 +315,16 @@ class DataCleaning:
             This function removes rows from a card table where the expiry date contains non-numeric
             characters except forward slash.
             """
+            
             values = []
             for name in store_data["locality"]:
                 if pd.notnull(name):  # Check if the value is not NaN
-                    for letter in name:
-                        if letter in "1234567890!#$%&'()*+,:;?@[\]^_`{|}~":
-                            values.append(name)
-                            break
+                    if any(letter.isdigit() for letter in name):
+                        values.append(name)
+
             indices = store_data[store_data["locality"].isin(values)].index
             store_data.drop(indices, inplace=True)
+
 
         def store_address_formatter():
             """
@@ -505,12 +461,12 @@ class DataCleaning:
             values = []
             for name in product_data["category"]:
                 if pd.notnull(name):  # Check if the value is not NaN
-                    for letter in name:
-                        if letter in "1234567890":
-                            values.append(name)
-                            break
+                    if any(letter.isdigit() for letter in name):
+                        values.append(name)
+
             indices = product_data[product_data["category"].isin(values)].index
             product_data.drop(indices, inplace=True)
+
 
         # rename Unnamed: 0 column to index
         product_data.rename(columns={"Unnamed: 0": "index"}, inplace=True)
@@ -548,7 +504,17 @@ class DataCleaning:
         return product_data
 
     def clean_orders_data(self, order_data):
-        # remove  columns level_0, first_name, last_name and 1
+        """
+        The function removes specific columns from a given order data and returns the cleaned data.
+        
+        Args:
+            order_data: The parameter "order_data" is likely a pandas DataFrame containing information
+        about orders. The function "clean_orders_data" is designed to modify this DataFrame by dropping
+        certain columns (labels) and returning the modified DataFrame.
+        
+        Returns:
+            the cleaned order data after dropping the specified columns.
+        """
         order_data.drop(
             labels=["level_0", "first_name", "last_name", "1"], axis=1, inplace=True
         )
@@ -577,15 +543,12 @@ class DataCleaning:
             
             values = []
             for name in date_events["month"]:
-                for letter in name:
-                    if (
-                        letter
-                        in "qwertyuiopasdfghjklmnbvcxzQWERTYUIOPLKJHGFDSAZXCVBNM!#$%&'()*+,/:;?@[\]^_`{|}~"
-                    ):
-                        values.append(name)
-                        break
+                if any(letter.isalpha() for letter in name):
+                    values.append(name)
+
             indices = date_events[date_events["month"].isin(values)].index
             date_events.drop(indices, inplace=True)
+
 
         events_corrupt_row_remover()
 

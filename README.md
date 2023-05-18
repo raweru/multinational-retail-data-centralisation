@@ -132,36 +132,36 @@ With the database setup, we are ready to answer some business questions.
 
 ### How many stores does the business have and in which countries?
 
-<img src="stores_per_country.png" alt="isolated" width="400"/>
+<img src="sql_queries/stores_per_country.png" alt="isolated" width="400"/>
 
 ### Which locations currently have the most stores?
 
-<img src="stores_per_locality.png" alt="isolated" width="400"/>
+<img src="sql_queries/stores_per_locality.png" alt="isolated" width="400"/>
 
 ### Which months produce the average highest cost of sales typically?
 
-<img src="sales_per_month.png" alt="isolated" width="650"/>
+<img src="sql_queries/sales_per_month.png" alt="isolated" width="650"/>
 
 ### How many sales are coming from online?
 
-<img src="web_offline.png" alt="isolated" width="500"/>
+<img src="sql_queries/web_offline.png" alt="isolated" width="500"/>
 
 ### What percentage of sales come through each type of store?
 
-<img src="store_type.png" alt="isolated" width="800"/>
+<img src="sql_queries/store_type.png" alt="isolated" width="800"/>
 
 ### Which month in each year produced the most sales?
 
-<img src="sales_month_year.png" alt="isolated" width="650"/>
+<img src="sql_queries/sales_month_year.png" alt="isolated" width="650"/>
 
 ### What is our staff headcount?
 
-<img src="staff_per_country.png" alt="isolated" width="400"/>
+<img src="sql_queries/staff_per_country.png" alt="isolated" width="400"/>
 
 ### Which German store type is selling the most?
 
-<img src="store_de.png" alt="isolated" width="700"/>
+<img src="sql_queries/store_de.png" alt="isolated" width="700"/>
 
 ### How quickly is the company making sales?
 
-<img src="times_sales.png" alt="isolated" width="650"/>
+<img src="sql_queries/times_sales.png" alt="isolated" width="650"/>
