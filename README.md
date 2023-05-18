@@ -160,7 +160,7 @@ With the database setup, we are ready to answer some business questions.
 
 ### Which German store type is selling the most?
 
-<img src="store_de.png" alt="isolated" width="400"/>
+<img src="store_de.png" alt="isolated" width="700"/>
 
 ### How quickly is the company making sales?
 
