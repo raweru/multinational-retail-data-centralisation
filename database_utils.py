@@ -15,7 +15,7 @@ class DatabaseConnector:
         self.DBAPI = "psycopg2"
         self.HOST = "localhost"
         self.USER = "postgres"
-        self.PASSWORD = "J3j27G.XxlF53"
+        self.PASSWORD = "password"
         self.DATABASE = "sales_data"
         self.PORT = 5432
 
