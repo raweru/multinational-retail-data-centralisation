@@ -5,94 +5,60 @@ import pandas as pd
 # The DataCleaning class contains methods to clean and standardize user and credit card data in pandas
 # dataframes.
 class DataCleaning:
+    
+    
     def __init__(self):
         pass
 
+
     def clean_user_data(self, user_table):
-        """
-        The function cleans and standardizes user data in a pandas DataFrame, including removing corrupt
-        rows, reformatting date columns, replacing newline characters in the address column, replacing a
-        specific country code, and standardizing phone numbers based on country code.
-
-        Args:
-            user_table: a pandas DataFrame containing user data, with columns such as "index",
-        "first_name", "last_name", "date_of_birth", "join_date", "address", "country_code", and
-        "phone_number". The function aims to clean and standardize the data in this table.
-
-        Returns:
-            a cleaned and standardized version of the input user_table dataframe, with null values and
-        corrupt rows removed, date and address columns reformatted, and phone numbers standardized
-        according to their respective country codes.
-        """
-        # set "index" column as the index
+        
+        '''The function cleans and standardizes user data, including phone numbers, for users in different
+        countries.
+        
+        Parameters
+        ----------
+        user_table
+            A pandas DataFrame containing user data, with columns including "index", "first_name",
+        "last_name", "date_of_birth", "join_date", "address", "country_code", and "phone_number".
+        
+        Returns
+        -------
+            a cleaned and standardized version of the input user_table, which includes removing null
+        values, standardizing date formats, and standardizing phone numbers for users in the UK,
+        Germany, and the US.
+        '''
+        
         user_table.set_index("index", inplace=True)
-
-        # 21 rows with only index and other columns all NULL
         user_table = user_table.replace("NULL", np.nan)
-
-        # drop rows with null values
         user_table = user_table.dropna()
-
-        def user_corrupt_row_remover():  # some rows have random numbers in all rows
-            """
-            The function removes rows from a user table where the first name contains any special
-            characters or numbers.
-            """
-            values = []
-            for name in user_table["first_name"]:
-                if any(letter.isdigit() for letter in name):
-                    values.append(name)
-
-            indices = user_table[user_table["first_name"].isin(values)].index
-            user_table.drop(indices, inplace=True)
-
-
-        def user_datetime_formatter():
-            """
-            This function converts and reformats date columns in a pandas dataframe to a consistent
-            format.
-            """
-            user_table["date_of_birth"] = pd.to_datetime(
-                user_table["date_of_birth"], errors="coerce"
-            )
-            # reformat the date column to YYYY-MM-DD, BD
-            user_table["date_of_birth"] = user_table["date_of_birth"].dt.strftime(
-                "%Y-%m-%d"
-            )
-            # convert the date column to datetime format, JD
-            user_table["join_date"] = pd.to_datetime(
-                user_table["join_date"], errors="coerce"
-            )
-            # reformat the date column to YYYY-MM-DD, JD
-            user_table["join_date"] = user_table["join_date"].dt.strftime("%Y-%m-%d")
-
-        def user_address_formatter():
-            """
-            This function replaces newline characters in the "address" column of a pandas DataFrame with
-            commas and spaces.
-            """
-            user_table["address"] = user_table["address"].str.replace("\n", ", ")
-
-        def user_country_code_GGB_to_GB():
-            """
-            This function replaces the country code "GGB" with "GB" in a user table.
-            """
-            # country_code GGB instead GB
-            user_table["country_code"] = user_table["country_code"].replace("GGB", "GB")
+        user_table = user_table[~user_table['first_name'].str.contains(r'\d', na=False)]
+        user_table["date_of_birth"] = pd.to_datetime(
+            user_table["date_of_birth"], errors="coerce")
+        user_table["date_of_birth"] = user_table["date_of_birth"].dt.strftime("%Y-%m-%d")
+        user_table["join_date"] = pd.to_datetime(
+            user_table["join_date"], errors="coerce")
+        user_table["join_date"] = user_table["join_date"].dt.strftime("%Y-%m-%d")
+        user_table["address"] = user_table["address"].str.replace("\n", ", ")
+        user_table["country_code"] = user_table["country_code"].replace("GGB", "GB")
 
         def standardize_GB_phone_number(phone_number):
-            """
-            The function standardizes a phone number in the format used in Great Britain by removing
-            whitespace, hyphens, and dots, and converting it to the international format with the
-            country code 0044.
-
-            Args:
-                phone_number: The input parameter is a string representing a phone number in the format
-            used in Great Britain (GB).
-
-            Returns:
-                a standardized version of the input phone number in the format used in Great Britain (GB).
-            """
+            
+            '''The function standardizes a UK phone number by removing whitespace, hyphens, and dots, and
+            converting it to the international format.
+            
+            Parameters
+            ----------
+            phone_number
+                The input parameter is a string representing a phone number in various formats.
+            
+            Returns
+            -------
+                a standardized version of the input phone number, with all whitespace characters, hyphens,
+            and dots removed, and with the country code for the United Kingdom (0044) added if
+            necessary.
+            '''
+            
             # remove all whitespace characters
             phone_number = phone_number.replace(" ", "")
             # remove hyphens
@@ -117,18 +83,22 @@ class DataCleaning:
             return phone_number
 
         def standardize_DE_phone_number(phone_number):
-            """
-            The function standardizes German phone numbers by removing whitespace, hyphens, and dots,
-            and adding the country code 0049 if necessary.
-
-            Args:
-                phone_number: The input parameter for the function standardize_DE_phone_number, which is
-            expected to be a phone number in Germany.
-
-            Returns:
-                the standardized version of the input phone number according to the rules specified in the
-            code.
-            """
+            
+            '''The function standardizes a German phone number by removing whitespace, hyphens, and dots,
+            adding the country code if missing, and converting different formats to a consistent format.
+            
+            Parameters
+            ----------
+            phone_number
+                a string representing a phone number in Germany, which may or may not be formatted
+            correctly.
+            
+            Returns
+            -------
+                the standardized version of the input phone number, with all whitespace characters,
+            hyphens, and dots removed, and with the appropriate country code (0049) added if necessary.
+            '''
+            
             # remove all whitespace characters
             phone_number = phone_number.replace(" ", "")
             # remove hyphens
@@ -159,17 +129,21 @@ class DataCleaning:
             return phone_number
 
         def standardize_US_phone_number(phone_number):
-            """
-            The function standardizes a US phone number by removing whitespace, hyphens, and dots, and
+            
+            '''The function standardizes a US phone number by removing whitespace, hyphens, and dots, and
             adding the country code if necessary.
-
-            Args:
-                phone_number: The input parameter is a string representing a phone number in the US
-            format.
-
-            Returns:
-                a standardized US phone number in the format "001XXX-XXX-XXXX".
-            """
+            
+            Parameters
+            ----------
+            phone_number
+                The input parameter for the function `standardize_US_phone_number()`. It is expected to be
+            a string representing a phone number in various formats.
+            
+            Returns
+            -------
+                a standardized US phone number in the format "001
+            '''
+            
             # remove all whitespace characters
             phone_number = phone_number.replace(" ", "")
             # remove hyphens
@@ -192,12 +166,7 @@ class DataCleaning:
 
             return phone_number
 
-        user_corrupt_row_remover()
-        user_datetime_formatter()
-        user_address_formatter()
-        user_country_code_GGB_to_GB()
-
-        # We'll iterate over rows of the dataframe and reassign the row to the standardized phone number version
+        # We iterate over rows and reassign the row to the standardized phone number version
         for index, row in user_table.iterrows():
             if row["country_code"] == "GB":
                 row["phone_number"] = standardize_GB_phone_number(row["phone_number"])
@@ -208,349 +177,239 @@ class DataCleaning:
 
         return user_table
 
+
     def clean_card_data(self, card_table):
-        """
-        The function cleans and formats credit card data in a pandas dataframe by removing null values,
-        corrupt rows, extra digits and question marks from the card provider and number columns, and
-        reformatting the date column.
-
-        Args:
-            card_table: The input parameter `card_table` is a pandas dataframe containing credit card
-        data.
-
-        Returns:
-            a cleaned version of the input `card_table` dataframe, with null values dropped, date columns
-        reformatted, corrupt rows removed, and certain characters removed from the `card_provider` and
-        `card_number` columns.
-        """
-        # replace 'NULL' string with null
+        
+        '''This function cleans and processes credit card data by removing null values, converting date
+        formats, removing leading question marks from card numbers, and filtering out non-numeric card
+        numbers.
+        
+        Parameters
+        ----------
+        card_table
+            A pandas DataFrame containing credit card data.
+        
+        Returns
+        -------
+            a cleaned version of the input `card_table` dataframe, where "NULL" values have been replaced
+        with NaN, rows with NaN values have been dropped, the "date_payment_confirmed" column has been
+        converted to a datetime format and reformatted to "YYYY-MM-DD", and any rows with non-numeric
+        characters in the "card_number" column have been removed.
+        '''
+        
         card_table = card_table.replace("NULL", np.nan)
-
-        # drop rows with null values
         card_table = card_table.dropna()
-
-        def card_datetime_formatter():
-            """
-            This function converts a date column in a pandas dataframe to datetime format and reformats
-            it to YYYY-MM-DD.
-            """
-            card_table["date_payment_confirmed"] = pd.to_datetime(
-                card_table["date_payment_confirmed"], errors="coerce"
-            )
-            # reformat the date column to YYYY-MM-DD
-            card_table["date_payment_confirmed"] = card_table[
-                "date_payment_confirmed"
-            ].dt.strftime("%Y-%m-%d")
-
-        # some rows have random numbers in all rows
+        card_table["date_payment_confirmed"] = pd.to_datetime(
+            card_table["date_payment_confirmed"], errors="coerce")
+        card_table["date_payment_confirmed"] = card_table[
+            "date_payment_confirmed"].dt.strftime("%Y-%m-%d")
         card_table = card_table[~card_table['card_number'].astype(str).str.contains('[a-zA-Z]')]
 
-        # some card numbers start with a few ? marks
         def card_q_mark_remover(card_number):
-            """
-            The function removes any leading question marks from a given card number string and returns
+            
+            '''The function removes any leading question marks from a given card number string and returns
             the integer value of the remaining string.
-
-            Args:
-                card_number: The input parameter is a numeric value representing a credit card number that
-            may contain question marks ("?"). The function removes any leading question marks and
-            returns the resulting integer value.
-
-            Returns:
+            
+            Parameters
+            ----------
+            card_number
+                The input parameter is a numeric value representing a credit card number that may contain
+            question marks ("?"). The function removes any leading question marks and returns the
+            resulting integer value.
+            
+            Returns
+            -------
                 the card number with any leading question marks removed.
-            """
+            '''
+            
             card_number = str(card_number)
             while card_number[0] == "?":
                 card_number = card_number[1:]
             card_number = int(card_number)
 
             return card_number
-
-        card_datetime_formatter()
         
         for index, row in card_table.iterrows():
             # iterate over rows of the dataframe and remove ? from card_number
             row["card_number"] = card_q_mark_remover(row["card_number"])
         
-        
         return card_table
 
+
     def clean_store_data(self, store_data):
-        """
-        This function cleans and formats data in a pandas DataFrame for a store dataset.
-
-        Args:
-            store_data: a pandas DataFrame containing information about stores, such as their addresses,
-        staff numbers, opening dates, and continents. The function aims to clean and format the data in
-        this DataFrame by removing missing values, formatting staff numbers and addresses, and
-        converting the opening date column to datetime format.
-
-        Returns:
-            the cleaned store_data dataframe after applying various data cleaning operations such as
-        replacing null values, dropping columns and rows with missing values, removing non-numeric
-        characters from staff numbers, removing "ee" from continent values, and reformatting date
-        columns to YYYY-MM-DD format.
-        """
-        # replace 'NULL' string with null
-        store_data = store_data.replace("NULL", np.nan)
-
-        # replace 'N/A' string with null
-        store_data = store_data.replace("N/A", np.nan)
-
-        # replace 'None' string with null
-        store_data = store_data.replace("None", np.nan)
-
-        # Drop lat column as only has 7 non null values
-        store_data = store_data.drop("lat", axis=1)
-
-        # Drop rows that have NULL in all columns
-        store_data.drop(labels=[217, 405, 437], axis=0, inplace=True)
         
+        '''The function cleans and processes store data by replacing null values, dropping columns and
+        rows, removing corrupted data, and formatting certain columns.
+        
+        Parameters
+        ----------
+        store_data
+            store_data is a pandas DataFrame containing information about stores, such as their location,
+        type, staff numbers, and opening date. The function clean_store_data takes this DataFrame as
+        input and performs various cleaning operations on it, such as replacing certain values with NaN,
+        dropping columns and rows, removing corrupted data,
+        
+        Returns
+        -------
+            the cleaned store data after performing various data cleaning operations.
+        '''
+        
+        store_data = store_data.replace("NULL", np.nan)
+        store_data = store_data.replace("N/A", np.nan)
+        store_data = store_data.replace("None", np.nan)
+        store_data = store_data.drop("lat", axis=1)
+        store_data.drop(labels=[217, 405, 437], axis=0, inplace=True)
         # Delete country code, continent for WEB PORTAL
         store_data.loc[store_data['store_type'] == 'Web Portal', ['country_code', 'continent']] = np.nan
-
-        # some rows have random numbers in all rows
-        def store_corrupt_row_remover():
-            """
-            This function removes rows from a card table where the expiry date contains non-numeric
-            characters except forward slash.
-            """
-            
-            values = []
-            for name in store_data["locality"]:
-                if pd.notnull(name):  # Check if the value is not NaN
-                    if any(letter.isdigit() for letter in name):
-                        values.append(name)
-
-            indices = store_data[store_data["locality"].isin(values)].index
-            store_data.drop(indices, inplace=True)
-
-
-        def store_address_formatter():
-            """
-            This function replaces newline characters in the "address" column of a pandas DataFrame with
-            commas and spaces.
-            """
-            store_data["address"] = store_data["address"].str.replace("\n", ", ")
-
-        # some staff numbers include letters
-        def store_staff_number_formatter():
-            """
-            The function removes any alphabetical characters from the 'staff_numbers' column in the
-            'store_data' dataframe.
-            """
-            store_data["staff_numbers"] = store_data["staff_numbers"].str.replace(
-                "[a-zA-Z]", ""
-            )
-
-        # some continent values eeAmerica/eeEurope need ee removed
-        def store_ee_continent_remover():
-            """
-            This function removes the string "ee" from the beginning of each value in a specific column
-            of a pandas DataFrame called "store_data".
-            """
-            store_data["continent"] = store_data["continent"].str.replace("^ee", "")
-
-        def store_datetime_formatter():
-            """
-            This function converts a date column in a pandas dataframe to datetime format and reformats
-            it to YYYY-MM-DD.
-            """
-            store_data["opening_date"] = pd.to_datetime(
-                store_data["opening_date"], errors="coerce"
-            )
-            # reformat the date column to YYYY-MM-DD
-            store_data["opening_date"] = store_data["opening_date"].dt.strftime(
-                "%Y-%m-%d"
-            )
-
-        store_datetime_formatter()
-        store_ee_continent_remover()
-        store_staff_number_formatter()
-        store_address_formatter()
-        store_corrupt_row_remover()
+        # Remove rows with corrupted data
+        store_data = store_data[~store_data["locality"].str.contains(r'\d', na=False)]
+        store_data["address"] = store_data["address"].str.replace("\n", ", ")
+        store_data["staff_numbers"] = store_data["staff_numbers"].str.replace("[a-zA-Z]", "")
+        store_data["continent"] = store_data["continent"].str.replace("^ee", "")
+        store_data["opening_date"] = pd.to_datetime(
+            store_data["opening_date"], errors="coerce")
+        store_data["opening_date"] = store_data["opening_date"].dt.strftime("%Y-%m-%d")
 
         return store_data
 
+
     def convert_product_weights(self, product_data):
-        """
-        This function converts product weights in various units to decimal values in kg and renames the
-        weight column as weight_kg while replacing 0.0 values with np.nan.
+        
+        '''This function converts product weights in various units to kilograms and updates the
+        product_data dataframe.
+        
+        Parameters
+        ----------
+        product_data
+            a pandas dataframe containing information about products, including their weights in various
+        units.
+        
+        Returns
+        -------
+            the updated product_data dataframe with weights converted to kilograms and NaN values replacing
+        0.0 values.
+        '''
+        
+        product_data["weight"] = product_data["weight"].str.replace(" .", "", regex=True)
 
-        Args:
-            product_data: a pandas DataFrame containing information about products, including their
-        weights in various units.
-
-        Returns:
-            the modified product_data dataframe with weights converted to decimal values in kg, the weight
-        column renamed to weight_kg, and any 0.0 values in the weight column replaced with np.nan.
-        """
-        # one value is "77g .", removing " ."
-        product_data["weight"] = product_data["weight"].str.replace(
-            " .", "", regex=True
-        )
-
-        # Convert weights to decimal values in kg
         def product_weight_kg_converter():
-            """
-            This function converts product weights in various units to kilograms and updates the
+            
+            '''This function converts product weights in various units to kilograms and updates the
             product_data dataframe.
-            """
+            '''
+            
             for index, row in product_data.iterrows():
                 weight = row["weight"]
                 # some values are 3 x 20g, splitting them on "x", removing "g" and multiplying
+                
                 if "x" in weight:
+                    
                     if weight.endswith("g"):
                         weight = weight[:-1]
                         substrings = weight.split("x")
                         weight = round(
-                            (float(substrings[0]) * float(substrings[1]) / 1000), 2
-                        )
+                            (float(substrings[0]) * float(substrings[1]) / 1000), 2)
+                        
                     elif weight.endswith("ml"):
                         weight = weight[:-2]
                         substrings = weight.split("x")
                         weight = round(
-                            (float(substrings[0]) * float(substrings[1]) / 1000), 2
-                        )
+                            (float(substrings[0]) * float(substrings[1]) / 1000), 2)
+                        
                 elif weight.endswith("kg"):
                     weight = round((float(weight[:-2])), 2)
+                    
                 elif weight.endswith("g"):
                     weight = round((float(weight[:-1]) / 1000), 2)
+                    
                 elif weight.endswith("ml"):
                     weight = round((float(weight[:-2]) / 1000), 2)
+                    
                 elif weight.endswith("oz"):
                     weight = round((float(weight[:-2]) * 28.413 / 1000), 2)
+                
+                #update weight    
                 product_data.at[index, "weight"] = weight
 
         product_weight_kg_converter()
 
-        # rename column as weight_kg
         product_data.rename(columns={"weight": "weight_kg"}, inplace=True)
-
-        # some products have value 0.0, changed to np.nan
         product_data["weight_kg"] = product_data["weight_kg"].replace(0.0, np.nan)
 
         return product_data
 
+
     def clean_products_data(self, product_data):
-        """
-        The function cleans and formats product data by dropping null rows, removing corrupt rows,
-        renaming columns, formatting prices, and converting date columns to datetime format.
-
-        Args:
-            product_data: A pandas dataframe containing product data.
-
-        Returns:
+        
+        '''The function cleans and preprocesses product data by dropping certain rows, renaming columns,
+        converting data types, and modifying values.
+        
+        Parameters
+        ----------
+        product_data
+            a pandas DataFrame containing information about products.
+        
+        Returns
+        -------
             the cleaned product data after performing various data cleaning operations such as dropping
-        rows with NULL values, removing rows with non-numeric characters in the expiry date, renaming
-        columns, formatting the date column to datetime format, and removing the £ sign from the product
-        price column.
-        """
-        # Drop rows that have NULL in all columns
+        specific rows, replacing values in a column, removing rows containing digits in a specific
+        column, renaming columns, removing currency symbol from a column, converting a column to
+        datetime format, and formatting the date column.
+        '''
+        
         product_data.drop(labels=[266, 788, 794, 1660], axis=0, inplace=True)
-        
-        # change "removed" values to boolean
         product_data["removed"] = product_data["removed"].replace({"Still_avaliable": False, "Removed": True})
-        
-        # some rows have random numbers in all rows
-        def product_corrupt_row_remover():
-            """
-            This function removes rows from a card table where the expiry date contains non-numeric
-            characters except forward slash.
-            """
-            values = []
-            for name in product_data["category"]:
-                if pd.notnull(name):  # Check if the value is not NaN
-                    if any(letter.isdigit() for letter in name):
-                        values.append(name)
-
-            indices = product_data[product_data["category"].isin(values)].index
-            product_data.drop(indices, inplace=True)
-
-
-        # rename Unnamed: 0 column to index
+        product_data = product_data[~product_data["category"].str.contains(r'\d', na=False)]
         product_data.rename(columns={"Unnamed: 0": "index"}, inplace=True)
-
-        # remove £ sign from prices and add to column name
-        def product_price_formatter():
-            """
-            This function renames a column in a dataframe and removes the pound sign from the values in
-            that column.
-            """
-            product_data.rename(
-                columns={"product_price": "product_price_£"}, inplace=True
-            )
-            product_data["product_price_£"] = product_data[
-                "product_price_£"
-            ].str.replace("£", "")
-
-        def product_datetime_formatter():
-            """
-            This function converts a date column in a pandas dataframe to datetime format and reformats
-            it to YYYY-MM-DD.
-            """
-            product_data["date_added"] = pd.to_datetime(
-                product_data["date_added"], errors="coerce"
-            )
-            # reformat the date column to YYYY-MM-DD
-            product_data["date_added"] = product_data["date_added"].dt.strftime(
-                "%Y-%m-%d"
-            )
-
-        product_datetime_formatter()
-        product_corrupt_row_remover()
-        product_price_formatter()
+        product_data.rename(columns={"product_price": "product_price_£"}, inplace=True)
+        product_data["product_price_£"] = product_data["product_price_£"].str.replace("£", "")
+        product_data["date_added"] = pd.to_datetime(product_data["date_added"], errors="coerce")
+        product_data["date_added"] = product_data["date_added"].dt.strftime("%Y-%m-%d")
 
         return product_data
 
+
     def clean_orders_data(self, order_data):
-        """
-        The function removes specific columns from a given order data and returns the cleaned data.
         
-        Args:
-            order_data: The parameter "order_data" is likely a pandas DataFrame containing information
-        about orders. The function "clean_orders_data" is designed to modify this DataFrame by dropping
-        certain columns (labels) and returning the modified DataFrame.
+        '''This function drops specific columns from a given order data and returns the modified data.
         
-        Returns:
+        Parameters
+        ----------
+        order_data
+            a pandas DataFrame containing order data, with columns "level_0", "first_name", "last_name",
+        and "1". The function drops these columns and returns the cleaned DataFrame.
+        
+        Returns
+        -------
             the cleaned order data after dropping the specified columns.
-        """
+        '''
+        
         order_data.drop(
-            labels=["level_0", "first_name", "last_name", "1"], axis=1, inplace=True
-        )
+            labels=["level_0", "first_name", "last_name", "1"], axis=1, inplace=True)
 
         return order_data
 
+
     def clean_date_events_data(self, date_events):
-        """
-        This function removes rows from a dataframe where the "month" column contains any
-        non-alphanumeric characters.
-
-        Args:
-            date_events: a pandas dataframe containing date and event information.
-
-        Returns:
-            The function `clean_date_events_data` is returning the cleaned `date_events` dataframe after
-        removing corrupted rows where the "month" column contains any non-alphanumeric characters.
-        """
-
-        # remove corrupted rows and rows with all null values
-        def events_corrupt_row_remover():
-            """
-            This function removes rows from a dataframe where the "month" column contains any
-            non-alphanumeric characters.
-            """
-            
-            values = []
-            for name in date_events["month"]:
-                if any(letter.isalpha() for letter in name):
-                    values.append(name)
-
-            indices = date_events[date_events["month"].isin(values)].index
-            date_events.drop(indices, inplace=True)
-
-
-        events_corrupt_row_remover()
+        
+        '''This function removes rows from a pandas DataFrame where the "month" column contains any
+        alphabetical characters.
+        
+        Parameters
+        ----------
+        date_events
+            A pandas DataFrame containing information about events and their corresponding dates. The
+        DataFrame has a column named "month" which contains the month of the event as a string. The
+        function is designed to clean this column by removing any rows where the month contains letters
+        (i.e. non-numeric characters). The cleaned
+        
+        Returns
+        -------
+            the cleaned date_events data, which is a pandas DataFrame with the rows containing non-numeric
+        characters in the "month" column removed.
+        '''
+        
+        date_events = date_events[~date_events["month"].str.contains(r'[a-zA-Z]', na=False)]
 
         return date_events
 
